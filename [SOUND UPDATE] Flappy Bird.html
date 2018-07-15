@@ -353,9 +353,7 @@ var canvas,
         onpress()
       }
     };
-		document.body.onmousedown = function() {
-			onpress()
-		};
+		document.addEventListener(evt, onpress);
 		canvas.width = width;
 		canvas.height = height;
 		ctx = canvas.getContext("2d");
