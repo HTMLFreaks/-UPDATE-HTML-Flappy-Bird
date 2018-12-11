@@ -1,19 +1,29 @@
 <!DOCTYPE html>
 <html>
-<style class="cp-pen-styles">canvas {
-	display: block;
-	position: absolute;
-	margin: auto;
-	top: 0;
-	bottom: 0;
-	left: 0;
-  right: 0;
-}</style><body>
+<style class="cp-pen-styles">
+    button {
+            background-color: rgba(0,0,0,0);
+            height: 30px;
+            width: 320px;
+    }
+    button:hover {
+            font-size: 20px;
+            box-shadow: 10px 10px 10px rgb(211,211,211) inset;
+            cursor: pointer;
+        }
+    </style>
+    <body>
     <audio id="flap" src="" hidden></audio>
     <audio id="die" src="" hidden></audio>
     <audio id="hit" src="" hidden></audio>
     <audio id="point" src="" hidden></audio>
-<script>var 
+    <div id="body_div">
+    <canvas id="canvas" width="320px" height="480px" style="border: 0px solid rgb(0, 0, 0); display: block;"></canvas>
+    <button id="jump_button" style="display:inline-block">Jump</button>
+    <button id="reset_button" style="display:none">Restart</button>
+    </div>
+<script>
+var 
 
 s_bird,
 s_bg,
@@ -95,7 +105,8 @@ function initSprites(img) {
 			x += step;
 		}
 	}
-}</script>
+}
+</script>
 <script>
 function forceDownload(url, fileName){
     var xhr = new XMLHttpRequest();
@@ -217,6 +228,12 @@ var canvas,
 					this.y = height - s_fg.height-10;
 					if(currentstate === states.Game) {
 						currentstate = states.Score;
+                hit.play();
+                die.play();
+                        var jumpbutton = document.getElementById("jump_button");
+                        var resetbutton = document.getElementById("reset_button");
+                        resetbutton.style = "display:inline-block";
+                        jumpbutton.style = "display: none";
                     }
 					this.velocity = this._jump;
 				}
@@ -267,7 +284,6 @@ var canvas,
 
 				if(i === 0) {
 					score += p.x === bird.x ? 1 : 0;
-
 					var cx = Math.min(Math.max(bird.x, p.x), p.x+p.width);
 					var cy1 = Math.min(Math.max(bird.y, p.y), p.y+p.height);
 					var cy2 = Math.min(Math.max(bird.y, p.y+p.height+80), p.y+2*p.height+80);
@@ -281,9 +297,13 @@ var canvas,
 
 					var r = bird.radius*bird.radius;
 					if(r > d1 || r > d2) {
-						currentstate = states.Score;
+                        currentstate = states.Score;
                         hit.play();
                         die.play();
+                        var jumpbutton = document.getElementById("jump_button");
+                        var resetbutton = document.getElementById("reset_button");
+                        resetbutton.style = "display:inline-block";
+                        jumpbutton.style = "display: none";
                     }
 				}
 				p.x -= 2;
@@ -307,8 +327,20 @@ var canvas,
 
 	};
 
-	function onpress(evt) {
-		switch (currentstate) {
+	function onpress() {
+	}
+	function main() {
+		var canvas = document.getElementById("canvas");
+
+		width = window.innerWidth;
+		height = window.innerHeight;
+		if(width >= 500) {
+			width = 320;
+			height = 480;
+			canvas.style.border = "0px solid white";
+		}
+    document.getElementById("jump_button").onmousedown = function() {
+        switch (currentstate) {
 			case states.Splash:
 				currentstate = states.Game;
                 bird.jump();
@@ -319,49 +351,25 @@ var canvas,
                 flap.play();
 				break;
 			case states.Score:
-				var mx = evt.offsetX, my = evt.offsetY;
-
-				if(mx == null || my == null) {
-					mx = evt.touches[0].clientX;
-					my = evt.touches[0].clientY;
-				}
-				if(okbtn.x < mx && mx < okbtn.x + okbtn.width &&
-					okbtn.y < my && my < okbtn.y + okbtn.height) {
-					pipes.reset();
-					currentstate = states.Splash;
-					score = 0;
-                }
+                pipes.update();
 				break;
 		}
         flap.currentTime = 0;
-	}
-	function main() {
-		canvas = document.createElement("canvas");
-
-		width = window.innerWidth;
-		height = window.innerHeight;
-
-		var evt = "touchstart";
-		if(width >= 500) {
-			width = 320;
-			height = 480;
-			canvas.style.border = "1px solid #000";
-			evt = "mousedown";
-		}
-    document.body.onkeydown = function(key) {
-      if (key.keyCode == 32) {
-        onpress()
-      }
     };
-		document.addEventListener(evt, onpress);
-		canvas.width = width;
-		canvas.height = height;
+    document.getElementById("reset_button").onmousedown = function() {
+                    pipes.reset();
+					currentstate = states.Splash;
+					score = 0;
+                        var jumpbutton = document.getElementById("jump_button");
+                        var resetbutton = document.getElementById("reset_button");
+                        resetbutton.style = "display:none";
+                        jumpbutton.style = "display:inline-block";
+    };
+        
+document.getElementById("reset_button").width = canvas.width;
 		ctx = canvas.getContext("2d");
 
 		currentstate = states.Splash;
-
-		document.body.appendChild(canvas);
-
 		var img = new Image();
 		img.onload = function() {
 			initSprites(this);
@@ -447,6 +455,21 @@ forceDownload("https://raw.githubusercontent.com/HTMLFreaks/HTML-Flappy-Bird/mas
 	}
 
 	main();
-</script><canvas width="320" height="480" style="border: 1px solid rgb(0, 0, 0);"></canvas>
+document.getElementById("fullscreen").onmousedown = function() {
+    var elem = document.getElementById("body_div");
+        if (elem.requestFullscreen) {
+            elem.requestFullscreen();
+}
+        else if (elem.msRequestFullscreen) {
+                elem.msRequestFullscreen();
+}
+        else if (elem.mozRequestFullScreen) {
+                elem.mozRequestFullScreen();
+}
+        else if (elem.webkitRequestFullscreen) {
+                elem.webkitRequestFullscreen();
+}
+};
+</script>
 </body>
 </html>
